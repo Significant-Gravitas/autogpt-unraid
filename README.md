@@ -2,6 +2,8 @@
 
 This repository contains the official Unraid Community Applications template
 for [AutoGPT Platform](https://github.com/Significant-Gravitas/AutoGPT).
+AutoGPT Platform is distributed under PolyForm Shield 1.0.0; the template
+repository itself is MIT-licensed.
 
 The template follows verified stable releases from
 [`significantgravitas/autogpt:latest`](https://hub.docker.com/r/significantgravitas/autogpt).

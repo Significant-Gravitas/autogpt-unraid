@@ -38,6 +38,7 @@ signup_enabled_choices="$(xmllint --xpath 'string(/Container/Config[@Name="Allow
 signup_enabled_value="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"])' "${template}")"
 beta="$(xmllint --xpath 'string(/Container/Beta)' "${template}")"
 overview="$(xmllint --xpath 'string(/Container/Overview)' "${template}")"
+app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
 
 [[ "${repository}" == "significantgravitas/autogpt:latest" ]]
 [[ "${network}" == "bridge" ]]
@@ -53,6 +54,7 @@ overview="$(xmllint --xpath 'string(/Container/Overview)' "${template}")"
 [[ "${signup_enabled_value}" == "true" ]]
 [[ "${beta}" == "true" ]]
 [[ "${overview}" == *"experimental single-node"* ]]
+[[ "${app_license}" == *"PolyForm Shield 1.0.0"* ]]
 
 for required_flag in \
   "--restart=unless-stopped" \

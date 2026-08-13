@@ -11,6 +11,7 @@
   <Support>REPLACE_WITH_UNRAID_SUPPORT_THREAD_URL</Support>
   <Project>https://github.com/Significant-Gravitas/AutoGPT</Project>
   <ReadMe>https://hub.docker.com/r/significantgravitas/autogpt</ReadMe>
+  <License>PolyForm Shield 1.0.0 (AutoGPT Platform); MIT (template repository)</License>
 
   <Overview>Run the complete AutoGPT Platform in one experimental single-node container, including the web app, APIs, workers, PostgreSQL, RabbitMQ, Valkey, and FalkorDB-backed memory. This distribution is intended for local and small deployments, not high availability. First startup takes several minutes and uses approximately 5-6 GiB of memory. Model-provider credentials are optional at startup; features that need one return their normal missing-credential error. Registration is enabled initially for the intended first account. Promote that account, then disable new registrations before exposing AutoGPT beyond your trusted network.</Overview>
 

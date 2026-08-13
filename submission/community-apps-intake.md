@@ -15,6 +15,8 @@ thread exist.
 - Application type: Docker
 - Architectures: amd64 and arm64
 - Beta marker: true
+- Application license: PolyForm Shield 1.0.0
+- Template repository license: MIT
 - Template count: one
 - GitHub 2FA acknowledgement: `REQUIRES_ORG_OWNER_CONFIRMATION`
 - Docker Hub 2FA acknowledgement: `REQUIRES_ORG_OWNER_CONFIRMATION`

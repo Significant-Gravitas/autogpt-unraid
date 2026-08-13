@@ -40,5 +40,5 @@ behavior, administrator promotion, registration closure, and relogin.
 - [ ] Template installs through Docker Authoring Mode on a fresh appdata path
 - [ ] Validate and Scan both pass in the Community Applications submission UI
 - [ ] Raw template and icon URLs return HTTP 200
-- [ ] `https://docs.agpt.co/platform/single-container` returns HTTP 200 after the docs PR lands
+- [ ] `https://docs.agpt.co/platform/self-hosting/single-container` returns HTTP 200 after the docs PR lands
 - [ ] Existing account can log in after template-driven recreation with signup closed

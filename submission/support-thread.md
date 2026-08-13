@@ -11,8 +11,8 @@ Community Applications.
 
 - Project: https://github.com/Significant-Gravitas/AutoGPT
 - Container: https://hub.docker.com/r/significantgravitas/autogpt
-- Full self-hosting guide: https://docs.agpt.co/platform/single-container
-- Template source: REPLACE_WITH_PUBLIC_TEMPLATE_REPOSITORY_URL
+- Full self-hosting guide: https://docs.agpt.co/platform/self-hosting/single-container
+- Template source: https://github.com/Significant-Gravitas/autogpt-unraid
 
 The image runs the complete AutoGPT Platform in one experimental single-node
 container, including the web app, APIs, workers, PostgreSQL, RabbitMQ, Valkey,

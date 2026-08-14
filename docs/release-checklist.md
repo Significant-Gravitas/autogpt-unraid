@@ -26,8 +26,10 @@ required check.
       multi-platform release; record its index digest.
 - [ ] The image exposes port 3000, declares `/data`, includes its healthcheck,
       and carries the expected source-revision label.
-- [ ] Install the template through current Unraid Docker Authoring Mode with a
-      fresh `/mnt/user/appdata/autogpt` path and host port 3000.
+- [x] Run the exact template Docker contract with a fresh
+      `/mnt/user/appdata/autogpt` path and host port 3000 without writing
+      protected Unraid configuration.
+- [ ] Import the same template through current Unraid Docker Authoring Mode.
 - [ ] Save, close, and reopen the template; confirm Unraid preserved all
       required fields and additional Docker arguments.
 - [ ] Wait for healthy state and verify `/healthz`.
@@ -37,9 +39,12 @@ required check.
 - [ ] Run a provider-free Builder workflow and confirm it persists in Library.
 - [ ] Confirm a provider-backed action without credentials returns an
       actionable missing-credential error.
-- [ ] Recreate the container from the template and confirm the account, agent,
-      and data persist.
-- [ ] Stop the container cleanly and confirm there is no OOM kill.
+- [x] Recreate the isolated contract container and confirm generated runtime
+      configuration and database files remain mounted.
+- [x] Stop the contract container cleanly and confirm exit code 0 with no OOM
+      kill.
+- [ ] Recreate through Docker Authoring Mode and confirm the account, agent,
+      and data persist through the UI-managed lifecycle.
 - [ ] Exercise update and rollback procedures without deleting appdata.
 
 ## Presentation and submission

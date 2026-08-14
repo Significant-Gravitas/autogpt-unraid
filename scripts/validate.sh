@@ -73,7 +73,8 @@ done
 
 if grep -R -E "REPLACE_WITH_|TBD_|REQUIRES_" \
   "${template}" "${profile}" "${repo_root}/README.md" \
-  "${repo_root}/CONTRIBUTING.md" "${repo_root}/SECURITY.md"; then
+  "${repo_root}/CONTRIBUTING.md" "${repo_root}/SECURITY.md" \
+  "${repo_root}/docs/validation.md" "${repo_root}/docs/release-checklist.md"; then
   echo "public-facing files contain unresolved placeholders" >&2
   exit 1
 fi

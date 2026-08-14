@@ -19,5 +19,7 @@ jobs:
         run: scripts/validate.sh
       - name: Check shell syntax
         run: bash -n scripts/validate.sh
+      - name: Lint shell
+        run: shellcheck scripts/validate.sh
       - name: Check repository whitespace
         run: git diff --check

@@ -37,7 +37,8 @@ sha256:4f8b92b8b0f144ae949893ea60e88c0aea74fdc4a8611338af53849495994754
 ## Validation boundary
 
 This acceptance run used an isolated port and named volume to protect existing
-Unraid workloads. Release acceptance additionally covers the exact template
-defaults—`/mnt/user/appdata/autogpt:/data`, host port `3000`, Docker Authoring
-Mode save/reopen behavior, Community Applications Validate and Scan, and
-persistence after a template-driven recreation.
+Unraid workloads. Before publication, the exact template must also be tested
+with its default `/mnt/user/appdata/autogpt:/data` mapping and host port `3000`.
+That final acceptance run must cover Docker Authoring Mode save/reopen behavior,
+Community Applications Validate and Scan, and persistence after a
+template-driven recreation.

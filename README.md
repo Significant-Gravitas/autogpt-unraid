@@ -1,7 +1,7 @@
 # AutoGPT for Unraid
 
-This repository contains the official Unraid Community Applications template
-for [AutoGPT Platform](https://github.com/Significant-Gravitas/AutoGPT). It runs
+This repository contains the official AutoGPT Platform template for
+[Unraid Community Applications](https://unraid.net/community/apps). It runs
 the complete Platform—including the web app, APIs, workers, PostgreSQL,
 RabbitMQ, Valkey, and FalkorDB-backed memory—from the official
 [`significantgravitas/autogpt`](https://hub.docker.com/r/significantgravitas/autogpt)
@@ -15,12 +15,16 @@ small deployments. It is not a high-availability configuration.
 After the template is listed in Community Applications, open **Apps**, search
 for **AutoGPT**, and select the template maintained by **Significant Gravitas**.
 Before catalog listing, maintainers can install the raw template URL through
-Unraid Docker Authoring Mode.
+Unraid Docker Authoring Mode:
+
+```text
+https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/templates/autogpt.xml
+```
 
 Before starting the container:
 
 1. Set **Public URL** to the exact origin you will use in the browser, including
-   the selected host port—for example, `http://tower.local:3000`.
+   the selected host port—for example, `http://192.168.1.10:3000`.
 2. Set **First Account Email** to the exact email address that should create the
    initial account.
 3. Keep **Allow New Accounts** set to `true` for the first signup.
@@ -29,6 +33,11 @@ Before starting the container:
 
 Start the container and wait for Docker to report `healthy`. First boot can
 take several minutes.
+
+Unraid's **WebUI** shortcut always opens the server IP with the configured host
+port over HTTP. If **Public URL** uses a hostname, HTTPS, or a reverse proxy,
+open that configured URL directly instead; authentication requires the browser
+origin to match **Public URL** exactly.
 
 ## Secure the first account
 
@@ -81,6 +90,12 @@ material template update.
 
 ## License
 
-The files in this template repository are licensed under the [MIT License](LICENSE).
-AutoGPT Platform itself is distributed under the
-[PolyForm Shield License 1.0.0](https://github.com/Significant-Gravitas/AutoGPT/blob/master/LICENSE).
+The template source and documentation are licensed under the
+[MIT License](LICENSE). The AutoGPT name and logo remain Significant Gravitas
+brand assets; the MIT license does not grant trademark rights. See
+[BRANDING.md](BRANDING.md).
+
+The published image labels its bundled software as
+`LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0`. AutoGPT Platform is distributed
+under the [PolyForm Shield License 1.0.0](https://github.com/Significant-Gravitas/AutoGPT/blob/master/LICENSE),
+and bundled components remain under their respective licenses.

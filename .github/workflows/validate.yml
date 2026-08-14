@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install XML tools
         run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
       - name: Validate template
@@ -22,4 +24,10 @@ jobs:
       - name: Lint shell
         run: shellcheck scripts/validate.sh
       - name: Check repository whitespace
-        run: git diff --check
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
+          else
+            git show --check --format= HEAD
+          fi

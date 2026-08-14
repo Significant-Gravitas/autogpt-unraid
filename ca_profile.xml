@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CommunityApplications>
-  <Profile>Official Unraid templates for AutoGPT Platform, maintained by Significant Gravitas.</Profile>
+  <Profile>AutoGPT-maintained Unraid Community Applications templates from Significant Gravitas.</Profile>
   <Icon>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/images/autogpt.png</Icon>
   <WebPage>https://github.com/Significant-Gravitas/autogpt-unraid</WebPage>
   <Forum>https://github.com/Significant-Gravitas/autogpt-unraid/issues</Forum>

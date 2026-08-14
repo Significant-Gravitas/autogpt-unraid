@@ -9,6 +9,9 @@ required check.
 - [ ] The repository is public and active.
 - [ ] The root MIT license, `ca_profile.xml`, template XML, and approved icon
       are present.
+- [ ] Legal confirms Community Applications eligibility for the exact image's
+      `LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0` license label and the
+      repository's brand notice.
 - [ ] GitHub and Docker Hub organization accounts enforce two-factor
       authentication.
 - [ ] `scripts/validate.sh` and repository CI pass on the exact release commit.

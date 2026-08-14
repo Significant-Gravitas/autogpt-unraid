@@ -6,9 +6,15 @@ template="${repo_root}/templates/autogpt.xml"
 profile="${repo_root}/ca_profile.xml"
 icon="${repo_root}/images/autogpt.png"
 license="${repo_root}/LICENSE"
+brand_notice="${repo_root}/BRANDING.md"
 
 command -v xmllint >/dev/null || {
   echo "xmllint is required" >&2
+  exit 1
+}
+
+command -v file >/dev/null || {
+  echo "file is required" >&2
   exit 1
 }
 
@@ -19,8 +25,19 @@ xmllint --noout "${template}" "${profile}"
   exit 1
 }
 
+icon_description="$(file -b "${icon}")"
+[[ "${icon_description}" == "PNG image data, 512 x 512, 8-bit/color RGBA,"* ]] || {
+  echo "images/autogpt.png must be a 512x512 RGBA PNG" >&2
+  exit 1
+}
+
 [[ -s "${license}" ]] || {
   echo "missing root LICENSE" >&2
+  exit 1
+}
+
+[[ -s "${brand_notice}" ]] || {
+  echo "missing BRANDING.md" >&2
   exit 1
 }
 
@@ -41,6 +58,7 @@ overview="$(xmllint --xpath 'string(/Container/Overview)' "${template}")"
 app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
 support_url="$(xmllint --xpath 'string(/Container/Support)' "${template}")"
 profile_forum="$(xmllint --xpath 'string(/CommunityApplications/Forum)' "${profile}")"
+extra_params="$(xmllint --xpath 'string(/Container/ExtraParams)' "${template}")"
 
 [[ "${repository}" == "significantgravitas/autogpt:latest" ]]
 [[ "${network}" == "bridge" ]]
@@ -56,25 +74,18 @@ profile_forum="$(xmllint --xpath 'string(/CommunityApplications/Forum)' "${profi
 [[ "${signup_enabled_value}" == "true" ]]
 [[ "${beta}" == "true" ]]
 [[ "${overview}" == *"experimental single-node"* ]]
-[[ "${app_license}" == *"PolyForm Shield 1.0.0"* ]]
+[[ "${app_license}" == *"LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0"* ]]
 [[ "${support_url}" == "https://github.com/Significant-Gravitas/autogpt-unraid/issues" ]]
 [[ "${profile_forum}" == "${support_url}" ]]
 
-for required_flag in \
-  "--restart=unless-stopped" \
-  "--stop-timeout 360" \
-  "--shm-size 2g" \
-  "--ulimit nofile=65536:65536" \
-  "--log-driver json-file" \
-  "--log-opt max-size=50m" \
-  "--log-opt max-file=1"; do
-  grep -Fq -- "${required_flag}" "${template}"
-done
+expected_extra_params="--restart=unless-stopped --stop-timeout 360 --shm-size 2g --ulimit nofile=65536:65536 --log-driver json-file --log-opt max-size=50m --log-opt max-file=1"
+[[ "${extra_params}" == "${expected_extra_params}" ]]
 
 if grep -R -E "REPLACE_WITH_|TBD_|REQUIRES_" \
   "${template}" "${profile}" "${repo_root}/README.md" \
   "${repo_root}/CONTRIBUTING.md" "${repo_root}/SECURITY.md" \
-  "${repo_root}/docs/validation.md" "${repo_root}/docs/release-checklist.md"; then
+  "${repo_root}/BRANDING.md" "${repo_root}/docs/validation.md" \
+  "${repo_root}/docs/release-checklist.md" "${repo_root}/.github"; then
   echo "public-facing files contain unresolved placeholders" >&2
   exit 1
 fi

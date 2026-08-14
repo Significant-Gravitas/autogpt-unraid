@@ -11,7 +11,7 @@ sha256:4f8b92b8b0f144ae949893ea60e88c0aea74fdc4a8611338af53849495994754
 
 ## Host and runtime
 
-- Native `linux/amd64` Unraid host
+- Native `linux/amd64` Unraid `7.2.3` host
 - Isolated host port and dedicated Docker named volume at `/data`
 - `2 GiB` shared memory
 - `nofile=65536:65536`

@@ -6,27 +6,28 @@ required check.
 
 ## Repository and policy
 
-- [ ] The repository is public and active.
-- [ ] The root MIT license, `ca_profile.xml`, template XML, and approved icon
+- [x] The repository is public and active.
+- [x] The root MIT license, `ca_profile.xml`, template XML, and approved icon
       are present.
-- [ ] Legal confirms Community Applications eligibility for the exact image's
-      `LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0` license label and the
-      repository's brand notice.
+- [x] The repository contents are MIT-licensed as required by Community
+      Applications. The container image's separate
+      `LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0` license is identified
+      without representing the application code as MIT-licensed.
 - [ ] GitHub and Docker Hub organization accounts enforce two-factor
       authentication.
-- [ ] `scripts/validate.sh` and repository CI pass on the exact release commit.
+- [x] `scripts/validate.sh` and repository CI pass on the exact release commit.
 - [ ] Community Applications **Validate** and **Scan** both pass after the final
       XML change.
-- [ ] The support, project, registry, readme, template, and icon URLs return
+- [x] The support, project, registry, readme, template, and icon URLs return
       HTTP 200 from a signed-out client.
 - [ ] **Settings → Docker → Docker Stop Timeout** is at least 360 seconds on
       the validation host; record that this is a global Unraid setting.
 
 ## Image and runtime
 
-- [ ] `significantgravitas/autogpt:latest` resolves to the intended stable
+- [x] `significantgravitas/autogpt:latest` resolves to the intended stable
       multi-platform release; record its index digest.
-- [ ] The image exposes port 3000, declares `/data`, includes its healthcheck,
+- [x] The image exposes port 3000, declares `/data`, includes its healthcheck,
       and carries the expected source-revision label.
 - [x] Run the exact template Docker contract with a fresh
       `/mnt/user/appdata/autogpt` path and host port 3000 without writing

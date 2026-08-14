@@ -85,6 +85,6 @@ protect existing Unraid workloads. The separate contract run covers the
 default bind path, port, arguments, health, graceful stop, and container
 recreation. The native authoring run covers UI serialization and healthy
 startup with isolated values, and it identified the global stop-timeout gate.
-After the repository becomes public, Docker Authoring Mode must still import
-the exact raw template and pass the final rendered-card check. Community
-Applications Validate and Scan must also pass on the exact public commit.
+The repository is now public. Docker Authoring Mode must still import the exact
+raw template and pass the final rendered-card check. Community Applications
+Validate and Scan must also pass on the exact public commit.

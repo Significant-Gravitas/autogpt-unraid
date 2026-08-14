@@ -51,12 +51,40 @@ container against the same bind mount returned healthy again; the generated
 runtime environment and PostgreSQL data predated the replacement and remained
 mounted. Existing AutoGPT containers and their data were not modified.
 
+## Native Docker Authoring Mode round trip
+
+The template contract was also entered through Unraid 7.2.3 Docker Authoring
+Mode and applied as the isolated `autogpt-ca-ui-test` container. To avoid
+conflicting with existing workloads, this run used host port `3002` and
+`/mnt/user/appdata/autogpt-ca-ui-test` while preserving container port `3000`
+and the `/data` target.
+
+Unraid saved and reopened the authored template with the expected image,
+container shell, bind mount, host port, public URL, signup allowlist, and
+registration setting. Runtime inspection confirmed the 2-GiB shared-memory
+allocation, `nofile=65536:65536`, 360-second container stop timeout, restart
+policy, bounded JSON logging, and exact environment values. The container
+reached healthy with zero restarts or OOM kills, and `/healthz` returned `ok`.
+
+The native Unraid **Stop** action then exposed a host-specific lifecycle gate.
+The host's global **Docker Stop Timeout** was the default 10 seconds. Unraid's
+Docker manager explicitly sent that value to the Engine, overriding the
+container's stored 360-second timeout. AutoGPT received SIGTERM and began a
+graceful shutdown, but Unraid forced termination after 10 seconds; the
+container exited `137` with `OOMKilled=false`.
+
+The test container, saved template, and appdata remain preserved and stopped.
+Before submission, set **Settings → Docker → Docker Stop Timeout** to at least
+360 seconds, repeat the native UI stop, and require exit code `0`. The setting
+is global to the Unraid host and was deliberately not changed during this test.
+
 ## Validation boundary
 
 The browser/account acceptance run used an isolated port and named volume to
-protect existing Unraid workloads. The separate contract run above covers the
+protect existing Unraid workloads. The separate contract run covers the
 default bind path, port, arguments, health, graceful stop, and container
-recreation, but it was deliberately launched without writing Unraid's protected
-configuration. Before publication, Docker Authoring Mode must still import the
-exact template and pass save/close/reopen and rendered-card checks. Community
+recreation. The native authoring run covers UI serialization and healthy
+startup with isolated values, and it identified the global stop-timeout gate.
+After the repository becomes public, Docker Authoring Mode must still import
+the exact raw template and pass the final rendered-card check. Community
 Applications Validate and Scan must also pass on the exact public commit.

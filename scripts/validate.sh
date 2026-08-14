@@ -55,6 +55,7 @@ signup_enabled_choices="$(xmllint --xpath 'string(/Container/Config[@Name="Allow
 signup_enabled_value="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"])' "${template}")"
 beta="$(xmllint --xpath 'string(/Container/Beta)' "${template}")"
 overview="$(xmllint --xpath 'string(/Container/Overview)' "${template}")"
+requires="$(xmllint --xpath 'string(/Container/Requires)' "${template}")"
 app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
 support_url="$(xmllint --xpath 'string(/Container/Support)' "${template}")"
 profile_forum="$(xmllint --xpath 'string(/CommunityApplications/Forum)' "${profile}")"
@@ -74,6 +75,8 @@ extra_params="$(xmllint --xpath 'string(/Container/ExtraParams)' "${template}")"
 [[ "${signup_enabled_value}" == "true" ]]
 [[ "${beta}" == "true" ]]
 [[ "${overview}" == *"experimental single-node"* ]]
+[[ "${requires}" == *"Docker Stop Timeout"* ]]
+[[ "${requires}" == *"at least 360 seconds"* ]]
 [[ "${app_license}" == *"LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0"* ]]
 [[ "${support_url}" == "https://github.com/Significant-Gravitas/autogpt-unraid/issues" ]]
 [[ "${profile_forum}" == "${support_url}" ]]

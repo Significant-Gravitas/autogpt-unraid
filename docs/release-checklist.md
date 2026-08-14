@@ -19,6 +19,8 @@ required check.
       XML change.
 - [ ] The support, project, registry, readme, template, and icon URLs return
       HTTP 200 from a signed-out client.
+- [ ] **Settings → Docker → Docker Stop Timeout** is at least 360 seconds on
+      the validation host; record that this is a global Unraid setting.
 
 ## Image and runtime
 
@@ -29,10 +31,12 @@ required check.
 - [x] Run the exact template Docker contract with a fresh
       `/mnt/user/appdata/autogpt` path and host port 3000 without writing
       protected Unraid configuration.
-- [ ] Import the same template through current Unraid Docker Authoring Mode.
-- [ ] Save, close, and reopen the template; confirm Unraid preserved all
+- [x] Enter the template contract through current Unraid Docker Authoring Mode.
+- [x] Save, close, and reopen the authored template; confirm Unraid preserved all
       required fields and additional Docker arguments.
-- [ ] Wait for healthy state and verify `/healthz`.
+- [ ] After the repository is public, import the exact raw template URL through
+      Docker Authoring Mode and confirm the rendered values match.
+- [x] Wait for healthy state and verify `/healthz`.
 - [ ] Create the allowlisted first account, complete onboarding, promote the
       account, set **Allow New Accounts** to `false`, and confirm a second
       signup is rejected.
@@ -43,6 +47,8 @@ required check.
       configuration and database files remain mounted.
 - [x] Stop the contract container cleanly and confirm exit code 0 with no OOM
       kill.
+- [ ] Stop the UI-managed container with Unraid's global Docker Stop Timeout set
+      to at least 360 seconds; confirm exit code 0 with no OOM kill.
 - [ ] Recreate through Docker Authoring Mode and confirm the account, agent,
       and data persist through the UI-managed lifecycle.
 - [ ] Exercise update and rollback procedures without deleting appdata.

@@ -30,6 +30,9 @@ Before starting the container:
 3. Keep **Allow New Accounts** set to `true` for the first signup.
 4. Keep the default appdata path unless you have an established Unraid storage
    convention.
+5. In **Settings → Docker**, set **Docker Stop Timeout** to at least `360`
+   seconds before stopping AutoGPT through Unraid. This is a global Unraid
+   setting, so review its effect on your other containers.
 
 Start the container and wait for Docker to report `healthy`. First boot can
 take several minutes.
@@ -58,7 +61,9 @@ Use HTTPS for any remote or LAN-wide deployment.
 - Persistent state: `/data`, mapped to `/mnt/user/appdata/autogpt` by default
 - Shared memory: `2 GiB`
 - Open-file limit: `65536`
-- Graceful stop timeout: `360 seconds`
+- Graceful stop timeout: `360 seconds`. Unraid's Docker manager sends its
+  global **Docker Stop Timeout** explicitly, so that global setting must also
+  be at least `360` seconds for UI-managed stops.
 - Observed memory use: approximately `5–6 GiB`; leave additional headroom for
   Unraid and other applications
 

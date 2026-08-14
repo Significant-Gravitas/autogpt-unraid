@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: AutoGPT product issue
+    url: https://github.com/Significant-Gravitas/AutoGPT/issues/new/choose
+    about: Report product behavior that is not specific to the Unraid template.
+  - name: Security vulnerability
+    url: https://github.com/Significant-Gravitas/AutoGPT/security/policy
+    about: Use the private security-reporting process. Do not disclose vulnerabilities publicly.

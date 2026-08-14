@@ -8,7 +8,7 @@
   <Shell>bash</Shell>
   <Privileged>false</Privileged>
 
-  <Support>REPLACE_WITH_UNRAID_SUPPORT_THREAD_URL</Support>
+  <Support>https://github.com/Significant-Gravitas/autogpt-unraid/issues</Support>
   <Project>https://github.com/Significant-Gravitas/AutoGPT</Project>
   <ReadMe>https://hub.docker.com/r/significantgravitas/autogpt</ReadMe>
   <License>PolyForm Shield 1.0.0 (AutoGPT Platform); MIT (template repository)</License>
@@ -25,7 +25,7 @@
   <PostArgs/>
   <CPUset/>
 
-  <Requires>Experimental single-node distribution; not a high-availability deployment. Set Public URL to the exact LAN or HTTPS origin used in the browser, including the selected host port. Enter the intended first account email. After signup, run docker exec AutoGPT autogpt-admin promote your-email@example.com, then edit this template and set Allow New Accounts to false. The workload has used approximately 5-6 GiB in testing; leave additional memory headroom for Unraid and other applications.</Requires>
+  <Requires>Experimental single-node distribution; not a high-availability deployment. Set Public URL to the exact LAN or HTTPS origin used in the browser, including the selected host port. Enter the intended first account email. After signup, run docker exec AutoGPT autogpt-admin promote your-email@example.com, then edit this template and set Allow New Accounts to false. The workload has used approximately 5-6 GiB in testing; leave additional memory headroom for Unraid and other applications. Support: https://github.com/Significant-Gravitas/autogpt-unraid/issues</Requires>
 
   <Config Name="Web UI Port" Target="3000" Default="3000" Mode="tcp" Description="Host port for the AutoGPT web interface. The container port remains 3000." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
   <Config Name="App Data" Target="/data" Default="/mnt/user/appdata/autogpt" Mode="rw" Description="Persistent accounts, agents, databases, memory, workspaces, and generated secrets." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/autogpt</Config>

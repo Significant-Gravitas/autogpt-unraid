@@ -17,3 +17,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
       - name: Validate template
         run: scripts/validate.sh
+      - name: Check shell syntax
+        run: bash -n scripts/validate.sh
+      - name: Check repository whitespace
+        run: git diff --check

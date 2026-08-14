@@ -3,6 +3,6 @@
   <Profile>Official Unraid templates for AutoGPT Platform, maintained by Significant Gravitas.</Profile>
   <Icon>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/images/autogpt.png</Icon>
   <WebPage>https://github.com/Significant-Gravitas/autogpt-unraid</WebPage>
-  <Forum>REPLACE_WITH_UNRAID_SUPPORT_THREAD_URL</Forum>
+  <Forum>https://github.com/Significant-Gravitas/autogpt-unraid/issues</Forum>
   <Discord>https://discord.gg/autogpt</Discord>
 </CommunityApplications>

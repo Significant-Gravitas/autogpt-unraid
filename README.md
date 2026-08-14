@@ -1,64 +1,86 @@
 # AutoGPT for Unraid
 
 This repository contains the official Unraid Community Applications template
-for [AutoGPT Platform](https://github.com/Significant-Gravitas/AutoGPT).
-AutoGPT Platform is distributed under PolyForm Shield 1.0.0; the template
-repository itself is MIT-licensed.
+for [AutoGPT Platform](https://github.com/Significant-Gravitas/AutoGPT). It runs
+the complete Platform—including the web app, APIs, workers, PostgreSQL,
+RabbitMQ, Valkey, and FalkorDB-backed memory—from the official
+[`significantgravitas/autogpt`](https://hub.docker.com/r/significantgravitas/autogpt)
+image.
 
-The template follows verified stable releases from
-[`significantgravitas/autogpt:latest`](https://hub.docker.com/r/significantgravitas/autogpt).
-The initial submission was validated against `v0.7.1`, whose multi-platform
-index digest is
-`sha256:4f8b92b8b0f144ae949893ea60e88c0aea74fdc4a8611338af53849495994754`.
+The single-container distribution is experimental and intended for local and
+small deployments. It is not a high-availability configuration.
 
-## Before submitting to Community Applications
+## Install
 
-1. Create the permanent `Significant-Gravitas/autogpt-unraid` repository.
-2. Create the required Unraid forum support thread.
-3. Replace `REPLACE_WITH_UNRAID_SUPPORT_THREAD_URL` in
-   `templates/autogpt.xml`.
-4. Confirm GitHub and Docker Hub 2FA for the Community Applications form.
-5. Run `scripts/validate.sh` and test the template on current Unraid.
-6. Submit this repository using the official Community Applications intake
-   form.
+After the template is listed in Community Applications, open **Apps**, search
+for **AutoGPT**, and select the template maintained by **Significant Gravitas**.
+Before catalog listing, maintainers can install the raw template URL through
+Unraid Docker Authoring Mode.
 
-The native release-image results are recorded in
-[`submission/acceptance-report.md`](submission/acceptance-report.md).
+Before starting the container:
 
-## Runtime notes
+1. Set **Public URL** to the exact origin you will use in the browser, including
+   the selected host port—for example, `http://tower.local:3000`.
+2. Set **First Account Email** to the exact email address that should create the
+   initial account.
+3. Keep **Allow New Accounts** set to `true` for the first signup.
+4. Keep the default appdata path unless you have an established Unraid storage
+   convention.
 
-- The web UI is on container port `3000`.
-- All persistent data is stored under `/data`.
-- The image includes its own Docker healthcheck. The lightweight liveness URL
-  is `/healthz`; wait for Docker to report `healthy` before using the app.
-- First boot can take several minutes and observed memory use is about 5-6 GiB.
-- This is an experimental single-node distribution for local and small
-  deployments, not a high-availability configuration. Leave additional memory
-  headroom for Unraid and other applications.
-- `AUTOGPT_PUBLIC_URL` must exactly match the browser-visible origin.
-- Registration begins open but is restricted by the exact email entered in the
-  template. After creating the account, promote it with:
+Start the container and wait for Docker to report `healthy`. First boot can
+take several minutes.
 
-  ```bash
-  docker exec AutoGPT autogpt-admin promote you@example.com
-  ```
+## Secure the first account
 
-  Then edit the container and set `AUTH_ALLOW_NEW_ACCOUNTS=false`.
-- Model-provider credentials are optional for startup and provider-free blocks.
-  Provider-backed features report the normal missing-credential error until
-  configured.
-
-For complete configuration and operations guidance, see the
-[Docker Hub Overview](https://hub.docker.com/r/significantgravitas/autogpt).
-
-## Validation
+Create the account using the exact email address configured in the template,
+then promote it to administrator:
 
 ```bash
-scripts/validate.sh
+docker exec AutoGPT autogpt-admin promote you@example.com
 ```
 
-The validator checks XML syntax, required local assets, selected static runtime
-fields, and submission placeholders. Live image, raw-URL, Community Apps scan,
-and Docker Authoring Mode checks are separate release steps. The final
-Authoring Mode round-trip must be completed manually in Unraid because that UI
-writes to the boot-device configuration.
+Edit the container, set **Allow New Accounts** to `false`, and apply the change.
+Complete these steps before exposing AutoGPT beyond the trusted local network.
+Use HTTPS for any remote or LAN-wide deployment.
+
+## Resources and persistence
+
+- Web interface: container port `3000`
+- Persistent state: `/data`, mapped to `/mnt/user/appdata/autogpt` by default
+- Shared memory: `2 GiB`
+- Open-file limit: `65536`
+- Graceful stop timeout: `360 seconds`
+- Observed memory use: approximately `5–6 GiB`; leave additional headroom for
+  Unraid and other applications
+
+The `/data` mapping contains accounts, agents, databases, memory, workspaces,
+and generated secrets. Preserve it across updates and container recreation.
+
+Model-provider credentials are optional for startup and provider-free blocks.
+Provider-backed features return an actionable missing-credential error until a
+compatible key or local provider is configured.
+
+## Documentation and support
+
+- [Single-container operator guide](https://docs.agpt.co/platform/self-hosting/single-container)
+- [AutoGPT documentation](https://docs.agpt.co/)
+- [Template issues](https://github.com/Significant-Gravitas/autogpt-unraid/issues)
+- [AutoGPT product issues](https://github.com/Significant-Gravitas/AutoGPT/issues)
+
+When requesting help, include your Unraid version, the image tag, Docker health
+state, relevant logs with secrets removed, and whether the issue reproduces on
+a fresh appdata path.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Template changes must preserve the
+official image's runtime contract and pass `scripts/validate.sh` before release.
+Maintainers should also complete the
+[release checklist](docs/release-checklist.md) for every catalog submission or
+material template update.
+
+## License
+
+The files in this template repository are licensed under the [MIT License](LICENSE).
+AutoGPT Platform itself is distributed under the
+[PolyForm Shield License 1.0.0](https://github.com/Significant-Gravitas/AutoGPT/blob/master/LICENSE).

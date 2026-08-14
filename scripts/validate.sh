@@ -39,6 +39,8 @@ signup_enabled_value="$(xmllint --xpath 'string(/Container/Config[@Name="Allow N
 beta="$(xmllint --xpath 'string(/Container/Beta)' "${template}")"
 overview="$(xmllint --xpath 'string(/Container/Overview)' "${template}")"
 app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
+support_url="$(xmllint --xpath 'string(/Container/Support)' "${template}")"
+profile_forum="$(xmllint --xpath 'string(/CommunityApplications/Forum)' "${profile}")"
 
 [[ "${repository}" == "significantgravitas/autogpt:latest" ]]
 [[ "${network}" == "bridge" ]]
@@ -55,6 +57,8 @@ app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
 [[ "${beta}" == "true" ]]
 [[ "${overview}" == *"experimental single-node"* ]]
 [[ "${app_license}" == *"PolyForm Shield 1.0.0"* ]]
+[[ "${support_url}" == "https://github.com/Significant-Gravitas/autogpt-unraid/issues" ]]
+[[ "${profile_forum}" == "${support_url}" ]]
 
 for required_flag in \
   "--restart=unless-stopped" \
@@ -67,8 +71,10 @@ for required_flag in \
   grep -Fq -- "${required_flag}" "${template}"
 done
 
-if grep -R "REPLACE_WITH_" "${template}" "${profile}"; then
-  echo "replace all submission placeholders before publishing" >&2
+if grep -R -E "REPLACE_WITH_|TBD_|REQUIRES_" \
+  "${template}" "${profile}" "${repo_root}/README.md" \
+  "${repo_root}/CONTRIBUTING.md" "${repo_root}/SECURITY.md"; then
+  echo "public-facing files contain unresolved placeholders" >&2
   exit 1
 fi
 

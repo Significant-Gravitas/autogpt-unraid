@@ -15,7 +15,7 @@ sha256:4f8b92b8b0f144ae949893ea60e88c0aea74fdc4a8611338af53849495994754
 - Isolated host port and dedicated Docker named volume at `/data`
 - `2 GiB` shared memory
 - `nofile=65536:65536`
-- 360-second graceful stop timeout
+- Defensive 360-second per-container stop allowance
 - Image-provided Docker healthcheck and `/healthz`
 - Observed steady-state memory: `5.542 GiB`
 
@@ -28,7 +28,7 @@ sha256:4f8b92b8b0f144ae949893ea60e88c0aea74fdc4a8611338af53849495994754
 - Marketplace route
 - Actionable missing-provider behavior in the UI and authenticated chat API
 - Administrator promotion with `autogpt-admin`
-- Graceful stop with exit code 0 and no OOM kill
+- Direct Docker stop with exit code 0 and no OOM kill
 - Exact-address signup allowlist
 - Closed-signup rejection with the identity count unchanged
 - Logout and password login after registration was disabled
@@ -41,8 +41,9 @@ template's exact default Docker contract:
 
 - host port `3000` mapped to container port `3000`;
 - bind mount `/mnt/user/appdata/autogpt:/data`;
-- the template's restart policy, 360-second stop timeout, 2-GiB shared memory,
-  `nofile=65536:65536`, and bounded JSON logging options; and
+- the template's restart policy, defensive 360-second per-container stop
+  allowance, 2-GiB shared memory, `nofile=65536:65536`, and bounded JSON
+  logging options; and
 - exact `AUTOGPT_PUBLIC_URL`, signup allowlist, and open-first-account values.
 
 The container reached healthy with zero restarts and `/healthz` returned `ok`.
@@ -62,9 +63,10 @@ and the `/data` target.
 Unraid saved and reopened the authored template with the expected image,
 container shell, bind mount, host port, public URL, signup allowlist, and
 registration setting. Runtime inspection confirmed the 2-GiB shared-memory
-allocation, `nofile=65536:65536`, 360-second container stop timeout, restart
-policy, bounded JSON logging, and exact environment values. The container
-reached healthy with zero restarts or OOM kills, and `/healthz` returned `ok`.
+allocation, `nofile=65536:65536`, defensive 360-second per-container stop
+allowance, restart policy, bounded JSON logging, and exact environment values.
+The container reached healthy with zero restarts or OOM kills, and `/healthz`
+returned `ok`.
 
 The native Unraid **Stop** action then exposed a host-specific lifecycle gate.
 The host's global **Docker Stop Timeout** was the default 10 seconds. Unraid's
@@ -73,10 +75,15 @@ container's stored 360-second timeout. AutoGPT received SIGTERM and began a
 graceful shutdown, but Unraid forced termination after 10 seconds; the
 container exited `137` with `OOMKilled=false`.
 
+This result is a product acceptance failure, not an operator configuration
+requirement. The host-wide timeout must not be increased as a workaround for
+AutoGPT.
+
 The test container, saved template, and appdata remain preserved and stopped.
-Before submission, set **Settings → Docker → Docker Stop Timeout** to at least
-360 seconds, repeat the native UI stop, and require exit code `0`. The setting
-is global to the Unraid host and was deliberately not changed during this test.
+Before submission, publish an image whose staged shutdown completes through
+Unraid's native **Stop** action with the stock 10-second host setting unchanged.
+Repeat the native UI stop and require exit code `0` with `OOMKilled=false`, then
+recreate the container and verify that the account, agent, and data persist.
 
 ## Validation boundary
 
@@ -85,6 +92,8 @@ protect existing Unraid workloads. The separate contract run covers the
 default bind path, port, arguments, health, graceful stop, and container
 recreation. The native authoring run covers UI serialization and healthy
 startup with isolated values, and it identified the global stop-timeout gate.
-The repository is now public. Docker Authoring Mode must still import the exact
-raw template and pass the final rendered-card check. Community Applications
-Validate and Scan must also pass on the exact public commit.
+The gate must be resolved in the product image and pass under stock Unraid
+settings before submission. The repository is now public. Docker Authoring
+Mode must still import the exact raw template and pass the final rendered-card
+check. Community Applications Validate and Scan must also pass on the exact
+public commit.

@@ -20,8 +20,8 @@ required check.
       XML change.
 - [x] The support, project, registry, readme, template, and icon URLs return
       HTTP 200 from a signed-out client.
-- [ ] **Settings → Docker → Docker Stop Timeout** is at least 360 seconds on
-      the validation host; record that this is a global Unraid setting.
+- [x] The template and operator documentation do not require changes to
+      Unraid's host-wide Docker Stop Timeout.
 
 ## Image and runtime
 
@@ -48,8 +48,10 @@ required check.
       configuration and database files remain mounted.
 - [x] Stop the contract container cleanly and confirm exit code 0 with no OOM
       kill.
-- [ ] Stop the UI-managed container with Unraid's global Docker Stop Timeout set
-      to at least 360 seconds; confirm exit code 0 with no OOM kill.
+- [ ] Leave Unraid's host-wide Docker Stop Timeout at the stock 10 seconds, stop
+      the UI-managed container through the native **Stop** action, and confirm
+      exit code 0 with no OOM kill. This is a product acceptance gate; do not
+      raise the host-wide timeout to satisfy it.
 - [ ] Recreate through Docker Authoring Mode and confirm the account, agent,
       and data persist through the UI-managed lifecycle.
 - [ ] Exercise update and rollback procedures without deleting appdata.

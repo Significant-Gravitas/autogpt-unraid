@@ -15,7 +15,8 @@ Template changes must continue to use the official
 - container port `3000`;
 - `2 GiB` shared memory;
 - `nofile=65536:65536`;
-- a `360`-second graceful stop timeout;
+- a defensive per-container `360`-second stop allowance, without treating it
+  as a substitute for clean shutdown through stock Unraid UI behavior;
 - the image-provided Docker healthcheck; and
 - exact `AUTOGPT_PUBLIC_URL`, `AUTH_SIGNUP_ALLOWLIST`, and
   `AUTH_ALLOW_NEW_ACCOUNTS` behavior.

@@ -51,7 +51,12 @@ required check.
 - [ ] Leave Unraid's host-wide Docker Stop Timeout at the stock 10 seconds, stop
       the UI-managed container through the native **Stop** action, and confirm
       exit code 0 with no OOM kill. This is a product acceptance gate; do not
-      raise the host-wide timeout to satisfy it.
+      raise the host-wide timeout to satisfy it. The image defect behind the
+      original `137` is fixed
+      ([AutoGPT#14077](https://github.com/Significant-Gravitas/AutoGPT/pull/14077))
+      and re-verified on the Unraid host at the stock timeout — see
+      `docs/validation.md`. This box needs the same stop repeated through the
+      UI control, against a published image that carries the fix.
 - [ ] Recreate through Docker Authoring Mode and confirm the account, agent,
       and data persist through the UI-managed lifecycle.
 - [ ] Exercise update and rollback procedures without deleting appdata.

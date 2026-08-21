@@ -10,7 +10,9 @@
 
   <Support>https://github.com/Significant-Gravitas/autogpt-unraid/issues</Support>
   <Project>https://github.com/Significant-Gravitas/AutoGPT</Project>
-  <ReadMe>https://hub.docker.com/r/significantgravitas/autogpt</ReadMe>
+  <Discord>https://discord.gg/autogpt</Discord>
+  <Reddit>https://www.reddit.com/r/AutoGPT</Reddit>
+  <ReadMe>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/README.md</ReadMe>
   <License>LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0 (image); MIT (template source and documentation)</License>
 
   <Overview>Run the complete AutoGPT Platform in one experimental single-node container, including the web app, APIs, workers, PostgreSQL, RabbitMQ, Valkey, and FalkorDB-backed memory. This distribution is intended for local and small deployments, not high availability. First startup takes several minutes and uses approximately 5-6 GiB of memory. Model-provider credentials are optional at startup; features that need one return their normal missing-credential error. Registration is enabled initially for the intended first account. Promote that account, then disable new registrations before exposing AutoGPT beyond your trusted network.</Overview>
@@ -20,6 +22,10 @@
   <WebUI>http://[IP]:[PORT:3000]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/templates/autogpt.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/images/autogpt.png</Icon>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/build_screen.jpg</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/autogpt_agent_dashboard.jpg</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/autogpt_marketplace.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/autogpt_autopilot_chat.jpg</Screenshot>
 
   <ExtraParams>--restart=unless-stopped --stop-timeout 360 --shm-size 2g --ulimit nofile=65536:65536 --log-driver json-file --log-opt max-size=50m --log-opt max-file=1</ExtraParams>
   <PostArgs/>

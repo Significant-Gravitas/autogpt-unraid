@@ -74,7 +74,7 @@ extra_params="$(xmllint --xpath 'string(/Container/ExtraParams)' "${template}")"
 [[ "${signup_enabled_choices}" == "true|false" ]]
 [[ "${signup_enabled_value}" == "true" ]]
 [[ "${beta}" == "true" ]]
-[[ "${overview}" == *"experimental single-node"* ]]
+[[ "${requires}" == *"Experimental single-node"* ]]
 [[ "${requires}" != *"Docker Stop Timeout"* ]]
 [[ "${requires}" != *"at least 360 seconds"* ]]
 [[ "${app_license}" == *"LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0"* ]]

@@ -15,7 +15,7 @@
   <ReadMe>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/README.md</ReadMe>
   <License>LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0 (image); MIT (template source and documentation)</License>
 
-  <Overview>Run the complete AutoGPT Platform in one experimental single-node container, including the web app, APIs, workers, PostgreSQL, RabbitMQ, Valkey, and FalkorDB-backed memory. This distribution is intended for local and small deployments, not high availability. First startup takes several minutes and uses approximately 5-6 GiB of memory. Model-provider credentials are optional at startup; features that need one return their normal missing-credential error. Registration is enabled initially for the intended first account. Promote that account, then disable new registrations before exposing AutoGPT beyond your trusted network.</Overview>
+  <Overview>Save hours every week with AI agents that handle repeatable work on your behalf—running on your own Unraid server and under your control. Tell AutoPilot what you want done or customize every step in the visual Builder, then run your agents on demand, on a schedule, or from a trigger. See Requirements for setup, memory, and first-account security guidance.</Overview>
 
   <Beta>true</Beta>
   <ExtraSearchTerms>AI agent agents LLM automation workflow no-code low-code chatbot copilot self-hosted OpenAI Anthropic GPT</ExtraSearchTerms>

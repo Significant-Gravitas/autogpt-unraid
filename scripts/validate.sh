@@ -54,7 +54,6 @@ signup_enabled_target="$(xmllint --xpath 'string(/Container/Config[@Name="Allow 
 signup_enabled_choices="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"]/@Default)' "${template}")"
 signup_enabled_value="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"])' "${template}")"
 beta="$(xmllint --xpath 'string(/Container/Beta)' "${template}")"
-overview="$(xmllint --xpath 'string(/Container/Overview)' "${template}")"
 requires="$(xmllint --xpath 'string(/Container/Requires)' "${template}")"
 app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
 support_url="$(xmllint --xpath 'string(/Container/Support)' "${template}")"

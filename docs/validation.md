@@ -117,6 +117,57 @@ arguments. Repeating the stop through the Unraid UI's native **Stop** control on
 a Docker Authoring Mode container remains part of the submission checklist, and
 requires a published image containing the fix.
 
+## Fully-local runtime proof
+
+A live Unraid 7.x installation later exercised AutoGPT entirely through an
+operator-run generation model and embedding model. The AutoGPT image carried
+source revision `65e80c71591461d77b19fe64c939dd768ab455ef`. Endpoint addresses,
+account data, and placeholder-key values are intentionally omitted.
+
+The working topology used two independent llama.cpp upstreams behind one
+AutoGPT-specific compatibility adapter running outside the tested AutoGPT
+container:
+
+- the normal `/v1` route forwarded chat to the generation server and embedding
+requests to the Nomic server;
+- `/v1/responses` requests were translated into schema-constrained chat
+  completions for Graphiti;
+- normal `/v1/embeddings` returned Nomic vectors padded from 768 to the 1536
+  values required by unified search; and
+- `/raw/v1/embeddings` returned the same model's native 768 values for the
+  existing Graphiti graph.
+
+Local transport always downgrades extended-thinking requests to the fast
+OpenAI-compatible path. The published local fields therefore intentionally
+omit `CHAT_THINKING_STANDARD_MODEL`; exposing it would imply a selectable local
+thinking path that the runtime does not provide.
+
+The accepted runtime evidence recorded for pull request 3 was:
+
+- AutoGPT reached healthy in approximately 75 seconds;
+- unified-search embedding backfill completed `5524/5524` items with zero
+  failures;
+- semantic search returned a relevant Discord result at `0.854` cosine for a
+  Discord-message query;
+- one Graphiti ingestion extracted 8 entities and 7 facts without a structured
+  output validation error; and
+- AutoPilot chat responded through the configured local generation model.
+
+A later read-only inspection confirmed that the normal and raw embedding routes
+returned 1536 and 768 values respectively, and recent chat-completion requests
+through the adapter completed successfully. The generation and embedding
+servers ran on separate ports and could therefore reside on the same inference
+device without being inside the AutoGPT container.
+
+This evidence proves the adapter behavior and the AutoGPT environment values.
+It does **not** yet prove the derived one-container image or the published
+fully-local XML: the accepted runtime used a host-local adapter script and
+pre-existing container configuration. The derived image now embeds that same
+adapter as an unprivileged Supervisor service, but still requires a fresh build,
+one-container installation through current Unraid Docker Authoring Mode, a
+save/reopen round trip, image-digest recording, clean-appdata acceptance, and
+Community Applications Validate and Scan before release.
+
 ## Validation boundary
 
 The browser/account acceptance run used an isolated port and named volume to
@@ -126,7 +177,9 @@ recreation. The native authoring run covers UI serialization and healthy
 startup with isolated values, and it identified the global stop-timeout gate.
 That gate has since been fixed in the product image and re-verified on this
 host under stock Unraid settings; the remaining step is to repeat it through
-the native UI control once an image carrying the fix is published. The repository is now public. Docker Authoring
-Mode must still import the exact raw template and pass the final rendered-card
-check. Community Applications Validate and Scan must also pass on the exact
-public commit.
+the native UI control once an image carrying the fix is published. The
+repository is now public. Docker Authoring Mode must still import each exact raw
+template and pass the final rendered-card and saved-value checks. The derived
+fully-local image retains the additional acceptance boundary described above.
+Community Applications Validate and Scan must also pass on the exact public
+commit and show exactly two AutoGPT listings.

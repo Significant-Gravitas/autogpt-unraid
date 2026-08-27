@@ -1,0 +1,15 @@
+.git
+.github
+docs
+images
+scripts
+templates
+test-candidates
+local-image/tests
+router/tests
+**/__pycache__
+**/*.py[cod]
+BRANDING.md
+README.md
+SECURITY.md
+ca_profile.xml

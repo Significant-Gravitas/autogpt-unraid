@@ -69,7 +69,8 @@ done
   fail "standalone router Dockerfile must not be published"
 
 assert_file_contains "${dockerfile}" "significantgravitas/autogpt@${base_digest}"
-# shellcheck disable=SC2016 -- this is a literal Dockerfile interpolation.
+# This assertion intentionally checks literal Dockerfile interpolation.
+# shellcheck disable=SC2016
 assert_file_contains "${dockerfile}" 'org.opencontainers.image.base.name="${AUTOGPT_IMAGE}"'
 assert_file_contains "${dockerfile}" "LISTEN_HOST=127.0.0.1"
 assert_file_contains "${dockerfile}" "CHAT_BASE_URL=http://127.0.0.1:8098/v1"

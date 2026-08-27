@@ -7,7 +7,27 @@ body:
   - type: markdown
     attributes:
       value: |
-        Remove secrets, email addresses, tokens, and other personal data from logs before submitting.
+        Remove secrets, email addresses, tokens, endpoint hostnames/IP addresses, prompt contents, and other personal data before submitting. For an endpoint, report only the software, port, and path shape needed to reproduce the problem.
+  - type: dropdown
+    id: template
+    attributes:
+      label: Template
+      options:
+        - AutoGPT (hosted/API-key-first)
+        - AutoGPT Fully Local
+        - Both AutoGPT variants
+    validations:
+      required: true
+  - type: dropdown
+    id: provider-mode
+    attributes:
+      label: Model-provider mode
+      options:
+        - Hosted through OpenRouter and OpenAI keys
+        - Fully local through self-operated llama.cpp endpoints
+        - Provider-free feature only
+    validations:
+      required: true
   - type: input
     id: unraid-version
     attributes:
@@ -18,14 +38,21 @@ body:
   - type: input
     id: image
     attributes:
-      label: AutoGPT image tag or digest
-      placeholder: significantgravitas/autogpt:latest
+      label: Container image tag or digest
+      description: Include the exact official image for AutoGPT or the exact derived image for AutoGPT Fully Local.
+      placeholder: significantgravitas/autogpt:latest or ghcr.io/significant-gravitas/autogpt-unraid-local:latest
     validations:
       required: true
+  - type: input
+    id: inference
+    attributes:
+      label: Inference servers and models
+      description: For local/custom mode, list server software and versions plus exact model IDs. Do not include endpoint addresses or keys.
+      placeholder: llama.cpp build 12345; chat-model-id; nomic-embed-text
   - type: dropdown
     id: health
     attributes:
-      label: Docker health state
+      label: AutoGPT Docker health state
       options:
         - healthy
         - starting
@@ -33,11 +60,28 @@ body:
         - no health state
     validations:
       required: true
+  - type: input
+    id: embedding-dimensions
+    attributes:
+      label: Observed embedding dimensions
+      description: For fully-local search or memory problems, report the adapter's normal /v1 and /raw/v1 result widths without pasting vectors or endpoint addresses.
+      placeholder: /v1 = 1536; /raw/v1 = 768
+  - type: dropdown
+    id: appdata
+    attributes:
+      label: Appdata state
+      options:
+        - Fresh appdata
+        - Existing appdata with unchanged embedding model and width
+        - Existing appdata after a model or width change
+        - Not applicable
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
       label: What happened?
-      description: Include the expected behavior, actual behavior, and whether this is a fresh appdata path.
+      description: Include expected and actual behavior, the affected route or feature, and whether chat, unified search, and Graphiti memory work independently.
     validations:
       required: true
   - type: textarea
@@ -51,5 +95,5 @@ body:
     attributes:
       label: Safety check
       options:
-        - label: I removed credentials, tokens, email addresses, and other personal data.
+        - label: I removed credentials, tokens, email addresses, endpoint addresses, prompt contents, and other personal data.
           required: true

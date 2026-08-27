@@ -1,4 +1,4 @@
-name: Validate Unraid template
+name: Validate Unraid artifacts
 
 on:
   pull_request:
@@ -12,12 +12,10 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: Install XML tools
-        run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
-      - name: Validate template
+      - name: Validate templates and fully-local overlay
         run: scripts/validate.sh
       - name: Check shell syntax
         run: bash -n scripts/validate.sh

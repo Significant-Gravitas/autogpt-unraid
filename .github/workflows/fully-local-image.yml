@@ -1,0 +1,172 @@
+name: Build and publish AutoGPT Fully Local image
+
+on:
+  pull_request:
+    paths:
+      - router/**
+      - local-image/**
+      - .github/workflows/fully-local-image.yml
+  push:
+    branches: [main]
+    paths:
+      - router/**
+      - local-image/**
+      - .github/workflows/fully-local-image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fully-local-image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/significant-gravitas/autogpt-unraid-local
+  CI_IMAGE: autogpt-unraid-local:ci
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Run adapter and image-overlay tests
+        run: |
+          python -m unittest discover -s router/tests -p 'test_*.py' -v
+          python -m unittest discover -s local-image/tests -p 'test_*.py' -v
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build image without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: local-image/Dockerfile
+          platforms: linux/amd64
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.CI_IMAGE }}
+
+      - name: Inspect inherited and embedded runtime contract
+        shell: bash
+        run: |
+          test -z "$(docker image inspect "${CI_IMAGE}" --format '{{.Config.User}}')"
+          test "$(docker image inspect "${CI_IMAGE}" --format '{{json .Config.Entrypoint}}')" = '["/usr/bin/tini","--","/opt/autogpt/single-container/entrypoint.sh"]'
+          test "$(docker image inspect "${CI_IMAGE}" --format '{{json .Config.Cmd}}')" = '["/usr/bin/supervisord","-n","-c","/opt/autogpt/single-container/supervisor/supervisord.conf"]'
+          test "$(docker image inspect "${CI_IMAGE}" --format '{{json .Config.Healthcheck.Test}}')" = '["CMD","/opt/autogpt-local/healthcheck.sh"]'
+          test "$(docker image inspect "${CI_IMAGE}" --format '{{index .Config.Labels "org.opencontainers.image.base.name"}}')" = 'significantgravitas/autogpt@sha256:9a97378805acd43b4bf12bac463f80ff10b7b3743146f74e35c7b7281d2ad48b'
+          ports="$(docker image inspect "${CI_IMAGE}" --format '{{json .Config.ExposedPorts}}')"
+          grep -Fq '3000/tcp' <<<"${ports}"
+          ! grep -Fq '8098/tcp' <<<"${ports}"
+          docker run --rm --entrypoint /bin/sh "${CI_IMAGE}" -ceu '
+            test "$(id -u autogpt-local-adapter)" = 10007
+            test "$(stat -c "%U:%G %a" /opt/autogpt-local/proxy.py)" = "root:root 555"
+            grep -Fq "local-model-adapter" /opt/autogpt/single-container/supervisor/supervisord.conf
+            grep -Fq "runtime:local-model-adapter" /usr/local/bin/autogpt-healthcheck
+          '
+
+      - name: Exercise one-container health and stock-timeout shutdown
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          network=autogpt-local-ci-network
+          volume=autogpt-local-ci-data
+          chat=autogpt-local-ci-chat
+          embed=autogpt-local-ci-embed
+          app=autogpt-local-ci-app
+          cleanup() {
+            docker rm -f "${app}" "${chat}" "${embed}" >/dev/null 2>&1 || true
+            docker volume rm "${volume}" >/dev/null 2>&1 || true
+            docker network rm "${network}" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker network create "${network}" >/dev/null
+          docker volume create "${volume}" >/dev/null
+          docker run -d --name "${chat}" --network "${network}" --no-healthcheck \
+            --entrypoint /usr/bin/python3 \
+            -v "${PWD}/local-image/tests/stub_health.py:/tmp/stub_health.py:ro" \
+            "${CI_IMAGE}" /tmp/stub_health.py >/dev/null
+          docker run -d --name "${embed}" --network "${network}" --no-healthcheck \
+            --entrypoint /usr/bin/python3 \
+            -v "${PWD}/local-image/tests/stub_health.py:/tmp/stub_health.py:ro" \
+            "${CI_IMAGE}" /tmp/stub_health.py >/dev/null
+          docker run -d --name "${app}" --network "${network}" \
+            -v "${volume}:/data" \
+            -e CHAT_UPSTREAM="http://${chat}:8765" \
+            -e EMBED_UPSTREAM="http://${embed}:8765" \
+            -e CHAT_FAST_STANDARD_MODEL=ornith-1.5-9b \
+            -e GRAPHITI_LLM_MODEL=ornith-1.5-9b \
+            -e GRAPHITI_RERANKER_MODEL=ornith-1.5-9b \
+            "${CI_IMAGE}" >/dev/null
+
+          status=starting
+          for _ in {1..72}; do
+            status="$(docker inspect "${app}" --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}')"
+            [[ "${status}" == healthy ]] && break
+            if [[ "$(docker inspect "${app}" --format '{{.State.Running}}')" != true ]]; then
+              docker logs --tail 200 "${app}"
+              exit 1
+            fi
+            sleep 5
+          done
+          if [[ "${status}" != healthy ]]; then
+            docker logs --tail 200 "${app}"
+            exit 1
+          fi
+
+          docker exec "${app}" /opt/autogpt-local/healthcheck.sh
+          pid="$(docker exec "${app}" pgrep -f '/opt/autogpt-local/proxy.py' | head -1)"
+          docker exec "${app}" grep -Eq '^NoNewPrivs:[[:space:]]+1$' "/proc/${pid}/status"
+          docker stop --time 10 "${app}" >/dev/null
+          test "$(docker inspect "${app}" --format '{{.State.ExitCode}}')" = 0
+          test "$(docker inspect "${app}" --format '{{.State.OOMKilled}}')" = false
+
+  publish:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=long
+
+      - name: Build and publish image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: local-image/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          pull: true
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: mode=max
+          sbom: true

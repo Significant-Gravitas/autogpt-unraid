@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container version="2">
+  <Name>AutoGPT-Fully-Local</Name>
+  <Repository>ghcr.io/significant-gravitas/autogpt-unraid-local:latest</Repository>
+  <Registry>https://github.com/Significant-Gravitas/autogpt-unraid/pkgs/container/autogpt-unraid-local</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+
+  <Support>https://github.com/Significant-Gravitas/autogpt-unraid/issues</Support>
+  <Project>https://github.com/Significant-Gravitas/AutoGPT</Project>
+  <Discord>https://discord.gg/autogpt</Discord>
+  <Reddit>https://www.reddit.com/r/AutoGPT</Reddit>
+  <ReadMe>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/docs/fully-local.md</ReadMe>
+  <License>LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0 (image); MIT (template source and documentation)</License>
+
+  <Overview>One-click AutoGPT Platform for models you operate. The AutoGPT container includes its private compatibility adapter; you provide one chat-capable llama.cpp origin, one embedding-only llama.cpp origin, and the exact generation model ID in three clearly labeled fields. Both model servers may run on the same Unraid device or another trusted-LAN machine. No OpenAI, Anthropic, or OpenRouter key is required for AutoPilot chat, Graphiti memory, or unified search. Individual agent blocks may still request their own credentials.</Overview>
+
+  <Beta>true</Beta>
+  <ExtraSearchTerms>AI agent agents LLM automation workflow no-code low-code chatbot copilot self-hosted fully local llama.cpp OpenAI compatible Graphiti Nomic</ExtraSearchTerms>
+  <Category>AI: Productivity:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/templates/autogpt-local.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/Significant-Gravitas/autogpt-unraid/main/images/autogpt.png</Icon>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/build_screen.jpg</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/autogpt_agent_dashboard.jpg</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/autogpt_marketplace.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/readme/autogpt_autopilot_chat.jpg</Screenshot>
+
+  <ExtraParams>--restart=unless-stopped --stop-timeout 360 --shm-size 2g --ulimit nofile=65536:65536 --add-host=host.docker.internal:host-gateway --log-driver json-file --log-opt max-size=50m --log-opt max-file=1</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+
+  <Requires>Use this template for local/custom endpoints you operate; hosted API-key installs use AutoGPT. The image includes the compatibility adapter but not model weights or inference servers. Run one unauthenticated chat-capable llama.cpp process and one unauthenticated embedding-only llama.cpp process before installation. They may share one device, but llama.cpp's embedding-only mode cannot also serve chat, so two origins/ports are required. Both /health endpoints must return HTTP 200 JSON with status set to ok. The chat model must support streaming, tools, strict structured output, reranker log probabilities, and at least 24k context; 32k is recommended. The embedding process must serve nomic-embed-text at 768 dimensions and expose /tokenize, /detokenize, and /v1/embeddings with a 2048-token ceiling. Use host.docker.internal for processes on this Unraid host or a LAN/VPN address for another trusted device; never use localhost. AutoGPT has used approximately 5-6 GiB of memory; inference RAM or VRAM is additional. The adapter and model endpoints are unauthenticated and must not be exposed to the internet. Setup guide: https://github.com/Significant-Gravitas/autogpt-unraid/blob/main/docs/fully-local.md</Requires>
+
+  <Config Name="Web UI Port" Target="3000" Default="3000" Mode="tcp" Description="Host port used to open AutoGPT. Example: 3000." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="App Data" Target="/data" Default="/mnt/user/appdata/autogpt-local" Mode="rw" Description="Persistent accounts, agents, databases, memory, workspaces, and generated secrets. Example: /mnt/user/appdata/autogpt-local." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/autogpt-local</Config>
+  <Config Name="Public URL" Target="AUTOGPT_PUBLIC_URL" Default="" Mode="" Description="Exact browser origin, including the selected host port. Example: http://192.168.1.10:3000." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="First Account Email" Target="AUTH_SIGNUP_ALLOWLIST" Default="" Mode="" Description="Only this address may create the initial account. Example: you@example.com." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Allow New Accounts" Target="AUTH_ALLOW_NEW_ACCOUNTS" Default="true|false" Mode="" Description="Use true for the first signup, then set false after promoting the intended account. Example: true." Type="Variable" Display="always" Required="true" Mask="false">true</Config>
+
+  <Config Name="Chat Server Origin" Target="CHAT_UPSTREAM" Default="" Mode="" Description="Required origin of the chat-capable llama.cpp process, without /v1. Chat and embeddings can run on the same device but require separate llama.cpp processes and ports because --embeddings disables chat. Examples: http://host.docker.internal:8099 on this Unraid host, or http://192.168.1.42:8099 on another trusted device." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Embedding Server Origin" Target="EMBED_UPSTREAM" Default="" Mode="" Description="Required origin of the separate llama.cpp process started with the Nomic embedding model, without /v1. It may run beside the chat process on the same device using another port. Examples: http://host.docker.internal:8100 on this Unraid host, or http://192.168.1.42:8100 on another trusted device." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Generation Model ID" Target="CHAT_FAST_STANDARD_MODEL" Default="" Mode="" Description="Exact ID exposed by the chat server; it must support streaming, tools, and strict structured output. Example: ornith-1.5-9b." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Memory Extraction Model ID" Target="GRAPHITI_LLM_MODEL" Default="" Mode="" Description="Normally enter the same exact value as Generation Model ID. Example: ornith-1.5-9b." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Memory Reranker Model ID" Target="GRAPHITI_RERANKER_MODEL" Default="" Mode="" Description="Normally enter the same exact value as Generation Model ID. The server must return log probabilities, and release acceptance must confirm the top reranker token is True or False for this tokenizer. Example: ornith-1.5-9b." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+</Container>

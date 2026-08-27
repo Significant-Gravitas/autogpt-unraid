@@ -2,94 +2,125 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-template="${repo_root}/templates/autogpt.xml"
-profile="${repo_root}/ca_profile.xml"
+templates_dir="${repo_root}/templates"
 icon="${repo_root}/images/autogpt.png"
-license="${repo_root}/LICENSE"
-brand_notice="${repo_root}/BRANDING.md"
+base_digest="sha256:9a97378805acd43b4bf12bac463f80ff10b7b3743146f74e35c7b7281d2ad48b"
 
-command -v xmllint >/dev/null || {
-  echo "xmllint is required" >&2
+fail() {
+  echo "validation failed: $*" >&2
   exit 1
 }
 
-command -v file >/dev/null || {
-  echo "file is required" >&2
-  exit 1
+assert_file_contains() {
+  local file="$1"
+  local expected_substring="$2"
+  grep -Fq -- "${expected_substring}" "${file}" || \
+    fail "${file#"${repo_root}/"}: expected text containing '${expected_substring}'"
 }
 
-xmllint --noout "${template}" "${profile}"
-
-[[ -s "${icon}" ]] || {
-  echo "missing images/autogpt.png" >&2
-  exit 1
+assert_file_not_contains() {
+  local file="$1"
+  local rejected_substring="$2"
+  ! grep -Fq -- "${rejected_substring}" "${file}" || \
+    fail "${file#"${repo_root}/"}: must not contain '${rejected_substring}'"
 }
 
+command -v python3 >/dev/null || fail "python3 is required"
+command -v file >/dev/null || fail "file is required"
+
+python3 "${repo_root}/scripts/validate_xml.py"
+
+[[ -s "${icon}" ]] || fail "missing images/autogpt.png"
 icon_description="$(file -b "${icon}")"
-[[ "${icon_description}" == "PNG image data, 512 x 512, 8-bit/color RGBA,"* ]] || {
-  echo "images/autogpt.png must be a 512x512 RGBA PNG" >&2
-  exit 1
-}
+[[ "${icon_description}" == "PNG image data, 512 x 512, 8-bit/color RGBA,"* ]] || \
+  fail "images/autogpt.png must be a 512x512 RGBA PNG"
+[[ -s "${repo_root}/LICENSE" ]] || fail "missing root LICENSE"
+[[ -s "${repo_root}/BRANDING.md" ]] || fail "missing BRANDING.md"
 
-[[ -s "${license}" ]] || {
-  echo "missing root LICENSE" >&2
-  exit 1
-}
+dockerfile="${repo_root}/local-image/Dockerfile"
+supervisor="${repo_root}/local-image/supervisord-local-adapter.conf"
+install_script="${repo_root}/local-image/install.py"
+runner="${repo_root}/local-image/run_adapter.py"
+combined_health="${repo_root}/local-image/healthcheck.sh"
+adapter_dir="${repo_root}/router"
+required_files=(
+  "${repo_root}/.dockerignore"
+  "${dockerfile}"
+  "${supervisor}"
+  "${install_script}"
+  "${runner}"
+  "${combined_health}"
+  "${repo_root}/scripts/validate_xml.py"
+  "${repo_root}/local-image/tests/test_install.py"
+  "${repo_root}/local-image/tests/test_run_adapter.py"
+  "${repo_root}/local-image/tests/stub_health.py"
+  "${adapter_dir}/proxy.py"
+  "${adapter_dir}/healthcheck.py"
+  "${adapter_dir}/tests/test_proxy.py"
+)
+for required_file in "${required_files[@]}"; do
+  [[ -s "${required_file}" ]] || \
+    fail "image overlay is incomplete: missing ${required_file#"${repo_root}/"}"
+done
 
-[[ -s "${brand_notice}" ]] || {
-  echo "missing BRANDING.md" >&2
-  exit 1
-}
+[[ ! -e "${templates_dir}/autogpt-local-router.xml" ]] || \
+  fail "standalone router template must not be published"
+[[ ! -e "${adapter_dir}/Dockerfile" ]] || \
+  fail "standalone router Dockerfile must not be published"
 
-repository="$(xmllint --xpath 'string(/Container/Repository)' "${template}")"
-network="$(xmllint --xpath 'string(/Container/Network)' "${template}")"
-privileged="$(xmllint --xpath 'string(/Container/Privileged)' "${template}")"
-post_args="$(xmllint --xpath 'string(/Container/PostArgs)' "${template}")"
-data_target="$(xmllint --xpath 'string(/Container/Config[@Name="App Data"]/@Target)' "${template}")"
-data_default="$(xmllint --xpath 'string(/Container/Config[@Name="App Data"]/@Default)' "${template}")"
-web_port="$(xmllint --xpath 'string(/Container/Config[@Name="Web UI Port"]/@Target)' "${template}")"
-public_url_target="$(xmllint --xpath 'string(/Container/Config[@Name="Public URL"]/@Target)' "${template}")"
-signup_allowlist_target="$(xmllint --xpath 'string(/Container/Config[@Name="First Account Email"]/@Target)' "${template}")"
-signup_enabled_target="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"]/@Target)' "${template}")"
-signup_enabled_choices="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"]/@Default)' "${template}")"
-signup_enabled_value="$(xmllint --xpath 'string(/Container/Config[@Name="Allow New Accounts"])' "${template}")"
-beta="$(xmllint --xpath 'string(/Container/Beta)' "${template}")"
-requires="$(xmllint --xpath 'string(/Container/Requires)' "${template}")"
-app_license="$(xmllint --xpath 'string(/Container/License)' "${template}")"
-support_url="$(xmllint --xpath 'string(/Container/Support)' "${template}")"
-profile_forum="$(xmllint --xpath 'string(/CommunityApplications/Forum)' "${profile}")"
-extra_params="$(xmllint --xpath 'string(/Container/ExtraParams)' "${template}")"
+assert_file_contains "${dockerfile}" "significantgravitas/autogpt@${base_digest}"
+# This assertion intentionally checks literal Dockerfile interpolation.
+# shellcheck disable=SC2016
+assert_file_contains "${dockerfile}" 'org.opencontainers.image.base.name="${AUTOGPT_IMAGE}"'
+assert_file_contains "${dockerfile}" "LISTEN_HOST=127.0.0.1"
+assert_file_contains "${dockerfile}" "CHAT_BASE_URL=http://127.0.0.1:8098/v1"
+assert_file_contains "${dockerfile}" "GRAPHITI_EMBEDDER_BASE_URL=http://127.0.0.1:8098/raw/v1"
+assert_file_contains "${dockerfile}" "GRAPHITI_EMBEDDER_MODEL=nomic-embed-text"
+assert_file_contains "${dockerfile}" "STORE_EMBEDDING_MODEL=nomic-embed-text"
+assert_file_contains "${dockerfile}" "--timeout=45s"
+assert_file_contains "${dockerfile}" "--start-period=5m"
+assert_file_not_contains "${dockerfile}" "EXPOSE 8098"
+assert_file_not_contains "${dockerfile}" "ENTRYPOINT"
+assert_file_not_contains "${dockerfile}" "USER "
+! grep -Eq '^CMD[[:space:]]' "${dockerfile}" || \
+  fail "local-image/Dockerfile must inherit AutoGPT's command"
 
-[[ "${repository}" == "significantgravitas/autogpt:latest" ]]
-[[ "${network}" == "bridge" ]]
-[[ "${privileged}" == "false" ]]
-[[ -z "${post_args}" ]]
-[[ "${data_target}" == "/data" ]]
-[[ "${data_default}" == "/mnt/user/appdata/autogpt" ]]
-[[ "${web_port}" == "3000" ]]
-[[ "${public_url_target}" == "AUTOGPT_PUBLIC_URL" ]]
-[[ "${signup_allowlist_target}" == "AUTH_SIGNUP_ALLOWLIST" ]]
-[[ "${signup_enabled_target}" == "AUTH_ALLOW_NEW_ACCOUNTS" ]]
-[[ "${signup_enabled_choices}" == "true|false" ]]
-[[ "${signup_enabled_value}" == "true" ]]
-[[ "${beta}" == "true" ]]
-[[ "${requires}" == *"Experimental single-node"* ]]
-[[ "${requires}" != *"Docker Stop Timeout"* ]]
-[[ "${requires}" != *"at least 360 seconds"* ]]
-[[ "${app_license}" == *"LicenseRef-PolyForm-Shield-1.0.0 AND SSPL-1.0"* ]]
-[[ "${support_url}" == "https://github.com/Significant-Gravitas/autogpt-unraid/issues" ]]
-[[ "${profile_forum}" == "${support_url}" ]]
+assert_file_contains "${supervisor}" "/usr/bin/env -i"
+assert_file_contains "${supervisor}" "/usr/bin/setpriv --no-new-privs"
+assert_file_contains "${supervisor}" "user=autogpt-local-adapter"
+assert_file_contains "${supervisor}" "stopwaitsecs=1"
+assert_file_contains "${install_script}" "REQUIRED_RUNTIME_PROGRAMS"
+assert_file_contains "${install_script}" "runtime:{PROGRAM_NAME}"
+assert_file_contains "${runner}" "INTERNAL_VARIABLES"
+assert_file_contains "${combined_health}" "/usr/local/bin/autogpt-healthcheck"
+assert_file_contains "${combined_health}" "/opt/autogpt-local/healthcheck.py"
+assert_file_contains "${adapter_dir}/proxy.py" 'os.getenv("CHAT_UPSTREAM"'
+assert_file_contains "${adapter_dir}/proxy.py" 'os.getenv("EMBED_UPSTREAM"'
+assert_file_contains "${adapter_dir}/proxy.py" "is_graphiti_reranker_request"
+assert_file_contains "${adapter_dir}/proxy.py" 'RAW_PREFIX = "/raw"'
 
-expected_extra_params="--restart=unless-stopped --stop-timeout 360 --shm-size 2g --ulimit nofile=65536:65536 --log-driver json-file --log-opt max-size=50m --log-opt max-file=1"
-[[ "${extra_params}" == "${expected_extra_params}" ]]
+pycache_dir="$(mktemp -d)"
+trap 'rm -rf -- "${pycache_dir}"' EXIT
+PYTHONPYCACHEPREFIX="${pycache_dir}" python3 -m py_compile \
+  "${repo_root}/scripts/validate_xml.py" \
+  "${adapter_dir}/proxy.py" \
+  "${adapter_dir}/healthcheck.py" \
+  "${adapter_dir}/tests/test_proxy.py" \
+  "${install_script}" \
+  "${runner}" \
+  "${repo_root}/local-image/tests/test_install.py" \
+  "${repo_root}/local-image/tests/test_run_adapter.py" \
+  "${repo_root}/local-image/tests/stub_health.py"
+PYTHONPYCACHEPREFIX="${pycache_dir}" python3 -m unittest discover \
+  -s "${adapter_dir}/tests" -p 'test_*.py' -v
+PYTHONPYCACHEPREFIX="${pycache_dir}" python3 -m unittest discover \
+  -s "${repo_root}/local-image/tests" -p 'test_*.py' -v
 
 if grep -R -E "REPLACE_WITH_|TBD_|REQUIRES_" \
-  "${template}" "${profile}" "${repo_root}/README.md" \
+  "${templates_dir}" "${repo_root}/ca_profile.xml" "${repo_root}/README.md" \
   "${repo_root}/CONTRIBUTING.md" "${repo_root}/SECURITY.md" \
-  "${repo_root}/BRANDING.md" "${repo_root}/docs/validation.md" \
-  "${repo_root}/docs/release-checklist.md" "${repo_root}/.github"; then
-  echo "public-facing files contain unresolved placeholders" >&2
-  exit 1
+  "${repo_root}/BRANDING.md" "${repo_root}/docs" "${repo_root}/.github"; then
+  fail "public-facing files contain unresolved placeholders"
 fi
 
-echo "Unraid template validation passed"
+echo "Two-variant Unraid templates and fully-local image overlay validation passed"

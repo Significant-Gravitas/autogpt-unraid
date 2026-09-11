@@ -83,6 +83,19 @@ extra_params="$(xmllint --xpath 'string(/Container/ExtraParams)' "${template}")"
 expected_extra_params="--restart=unless-stopped --stop-timeout 360 --shm-size 2g --ulimit nofile=65536:65536 --log-driver json-file --log-opt max-size=50m --log-opt max-file=1"
 [[ "${extra_params}" == "${expected_extra_params}" ]]
 
+# Self-hosted operators pay the model provider directly, so both AutoPilot
+# spend caps must ship disabled (-1) and stay optional.
+for cap_target in CHAT_DAILY_COST_LIMIT_MICRODOLLARS CHAT_WEEKLY_COST_LIMIT_MICRODOLLARS; do
+  cap_default="$(xmllint --xpath "string(/Container/Config[@Target=\"${cap_target}\"]/@Default)" "${template}")"
+  cap_value="$(xmllint --xpath "string(/Container/Config[@Target=\"${cap_target}\"])" "${template}")"
+  cap_display="$(xmllint --xpath "string(/Container/Config[@Target=\"${cap_target}\"]/@Display)" "${template}")"
+  cap_required="$(xmllint --xpath "string(/Container/Config[@Target=\"${cap_target}\"]/@Required)" "${template}")"
+  [[ "${cap_default}" == "-1" ]]
+  [[ "${cap_value}" == "-1" ]]
+  [[ "${cap_display}" == "advanced" ]]
+  [[ "${cap_required}" == "false" ]]
+done
+
 if grep -R -E "REPLACE_WITH_|TBD_|REQUIRES_" \
   "${template}" "${profile}" "${repo_root}/README.md" \
   "${repo_root}/CONTRIBUTING.md" "${repo_root}/SECURITY.md" \
